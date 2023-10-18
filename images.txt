@@ -1,0 +1,84 @@
+// Function to detect NSFW images using a pre-trained model
+let model;
+
+async function loadModel() {
+  try {
+    model = await tf.loadLayersModel('https://raw.githubusercontent.com/GramThanos/NSFW-Image-Filter-Browser-Extension/master/dist/model/model.json');
+  } catch (error) {
+    console.error('Error loading model:', error);
+  }
+}
+
+// Function to process a single image
+async function processImage(imgScr) {
+  if (!model) {
+    console.error('Model not loaded');
+    return false;
+  }
+  // console.log('Processing image:', imgScr);
+  const imgElement = document.createElement('img');
+  imgElement.setAttribute('crossOrigin', 'anonymous');
+  imgElement.src = imgScr;
+  await new Promise((resolve, reject) => {
+    imgElement.onload = resolve;
+    imgElement.onerror = reject;
+  });
+  // console.log(imgElement.src);
+
+
+  // Load and preprocess the image
+  const image = tf.browser.fromPixels(imgElement).toFloat();
+  const normalizedImage = image.div(255.0);
+
+  // Resize the image to match the model's input size
+  const resizedImage = tf.image.resizeBilinear(normalizedImage, [299, 299]);
+
+  // Expand dimensions to match the model's input shape
+  const inputTensor = resizedImage.expandDims(0);
+
+  // Make predictions using the model
+  const predictions = model.predict(inputTensor);
+  // console.log(predictions.dataSync());
+
+  // Define a threshold for NSFW classification
+  const nsfwThreshold = 0.3;
+
+  // Check if NSFW score is above the threshold
+  const isNSFW = predictions.dataSync()[1] > nsfwThreshold || predictions.dataSync()[3] > nsfwThreshold || predictions.dataSync()[4] > nsfwThreshold;
+
+  // Dispose of tensors to free up GPU memory
+  inputTensor.dispose();
+  predictions.dispose();
+
+  return isNSFW;
+}
+
+// Function to apply blur to all images on page load
+async function blurAllImages() {
+  const images = document.querySelectorAll("img");
+  // console.log('Checking images');
+  for (const imgElement of images) {
+    // console.log(imgElement.src);
+    try{
+      if((!imgElement.classList.contains("checked"))&&imgElement.width>40&&imgElement.height>40&&await processImage(imgElement.src))
+    {
+      imgElement.style.filter = "blur(5px)";
+    }
+    }
+    catch(err)
+    {
+      console.log(err);
+    }
+    
+    imgElement.classList.add("checked");
+  }
+}
+
+// Run blurAllImages() when the page is fully loaded
+window.addEventListener('load', async () => {
+  // console.log('Page loaded');
+  await loadModel();
+  // Start periodic image checking (adjust the interval as needed)
+  blurAllImages(); // Initial check on page load
+  setInterval(blurAllImages, 10000); // Check every 10 seconds  
+});

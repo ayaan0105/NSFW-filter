@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="popup.css">
+  <title>NSFW Image Filter</title>
+  <script src="popup.js"></script>
+</head>
+<body>
+  <div class="header">
+    <img src="nsfw.png" alt="NSFW Icon" class="icon">
+    <h1>NSFW Image Filter</h1>
+  </div>
+  <main>
+    <h2 class="heading">Content Filtering</h2>
+    <label class="switch">
+      <input type="checkbox" id="filterToggle">
+      <span class="slider round"></span>
+    </label>
+    <p id="toggleLabel">Enable</p>
+    <div class="bug-report">
+      <div class="bug-header">
+        <h3>Report a Bug</h3>
+        <img src="bug-report.png" alt="Bug Report Icon" class="bug-icon">
+      </div>
+      <textarea id="bugReport" placeholder="Describe the bug..."></textarea>
+      <button id="sendBugReport">Send</button>
+    </div>
+  </main>
+</body>
+</html>

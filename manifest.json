@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "NSFW Image Filter",
+  "version": "1.0",
+  "description": "Detect and blur NSFW images",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+      "default_popup": "popup.html",
+      "default_icon": "nsfw.png"
+  },
+  "icons": {
+      "128": "nsfw.png"
+  },
+  "content_scripts": [
+      {
+          "matches": ["<all_urls>"],
+          "js": ["tf.min.js", "content.js"]
+      }
+  ]
+}
